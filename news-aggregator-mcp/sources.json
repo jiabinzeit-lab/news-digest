@@ -6,8 +6,7 @@
       "emoji": "🇨🇳",
       "priority_keywords": ["China", "Chinese", "Beijing", "Shanghai", "Xi Jinping", "CCP", "PRC", "Mainland", "Taiwan Strait", "PLA"],
       "sources": [
-        { "name": "SCMP China", "url": "https://www.scmp.com/rss/4/feed" },
-        { "name": "RFI中文", "url": "https://www.rfi.fr/cn/rss" }
+        { "name": "SCMP China", "url": "https://www.scmp.com/rss/4/feed" }
       ]
     },
     {
