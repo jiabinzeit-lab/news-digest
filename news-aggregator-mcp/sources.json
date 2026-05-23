@@ -66,7 +66,7 @@
       "label": "科技",
       "emoji": "💻",
       "sources": [
-        { "name": "Hacker News", "url": "https://hnrss.org/frontpage" },
+        { "name": "Wired", "url": "https://www.wired.com/feed/rss" },
         { "name": "Ars Technica", "url": "http://feeds.arstechnica.com/arstechnica/index" },
         { "name": "MIT Tech Review", "url": "https://www.technologyreview.com/feed/" }
       ]
