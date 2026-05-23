@@ -25,7 +25,7 @@ if (!BOT_TOKEN || !CHAT_ID) {
   process.exit(1);
 }
 const FRESHNESS_MS = 24 * 60 * 60 * 1000;
-const GERMAN_SOURCES = new Set(["taz", "Die Zeit", "Süddeutsche Zeitung"]);
+const GERMAN_SOURCES = new Set(["Die Zeit", "Süddeutsche Zeitung"]);
 
 async function translateFromGerman(title, summary) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
