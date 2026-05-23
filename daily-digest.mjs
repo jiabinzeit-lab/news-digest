@@ -7,6 +7,7 @@ import { createRequire } from "module";
 import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import path from "path";
+import Anthropic from "@anthropic-ai/sdk";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -24,6 +25,31 @@ if (!BOT_TOKEN || !CHAT_ID) {
   process.exit(1);
 }
 const FRESHNESS_MS = 24 * 60 * 60 * 1000;
+const GERMAN_SOURCES = new Set(["taz", "Die Zeit", "Süddeutsche Zeitung"]);
+
+async function translateFromGerman(title, summary) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return { title, summary };
+  try {
+    const client = new Anthropic({ apiKey });
+    const input = `Title: ${title}\nSummary: ${summary || ""}`;
+    const res = await client.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 300,
+      messages: [{
+        role: "user",
+        content: `Translate this German news title and summary to English. Reply with exactly two lines:\nTitle: <translated title>\nSummary: <translated summary>\n\n${input}`,
+      }],
+    });
+    const text = res.content[0].text;
+    const t = text.match(/Title:\s*(.+)/)?.[1]?.trim() || title;
+    const s = text.match(/Summary:\s*(.+)/)?.[1]?.trim() || summary;
+    return { title: t, summary: s };
+  } catch (e) {
+    log(`⚠️  翻译失败: ${e.message}`);
+    return { title, summary };
+  }
+}
 
 function log(msg) {
   const line = `[${new Date().toISOString()}] ${msg}`;
@@ -66,6 +92,12 @@ async function main() {
       const batches = await Promise.all(cat.sources.map((s) => fetchSource(parser, s)));
       const all = batches.flat().sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
       const best = all.find((a) => a.fresh) || all[0] || null;
+      // 德文来源自动翻译
+      if (best && GERMAN_SOURCES.has(best.source)) {
+        const translated = await translateFromGerman(best.title, best.summary);
+        best = { ...best, ...translated };
+        log(`🔤 已翻译: "${best.title.slice(0, 50)}"`);
+      }
       log(`${cat.emoji} ${cat.label}: ${best ? `"${best.title.slice(0, 50)}" [${best.source}]` : "无文章"}`);
       return { ...cat, article: best };
     })
