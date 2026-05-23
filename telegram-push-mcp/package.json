@@ -1,0 +1,11 @@
+{
+  "name": "telegram-push-mcp",
+  "version": "1.0.0",
+  "description": "Send-only Telegram MCP (no polling)",
+  "type": "module",
+  "main": "index.js",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}

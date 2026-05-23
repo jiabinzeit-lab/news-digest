@@ -1,0 +1,42 @@
+name: Daily News Digest
+
+on:
+  schedule:
+    # 7:00 UTC = 9:00 CEST (夏令时, 4月-10月)
+    # 8:00 UTC = 9:00 CET  (冬令时, 10月-4月)
+    # 两个时间都触发，脚本内部判断柏林时间是否为9点
+    - cron: '0 7 * * *'
+    - cron: '0 8 * * *'
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  send-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            news-aggregator-mcp/package-lock.json
+            telegram-push-mcp/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd news-aggregator-mcp && npm ci
+          cd ../telegram-push-mcp && npm ci
+
+      - name: Check Berlin time and send digest
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          # 只在柏林时间8:50-9:10之间运行（处理夏令时切换边界）
+          BERLIN_HOUR=$(TZ=Europe/Berlin date +%H)
+          if [ "$BERLIN_HOUR" = "09" ]; then
+            node daily-digest.mjs
+          else
+            echo "柏林当前 ${BERLIN_HOUR} 时，跳过（非9点窗口）"
+          fi

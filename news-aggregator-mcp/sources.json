@@ -1,0 +1,90 @@
+{
+  "categories": [
+    {
+      "id": "china",
+      "label": "中国",
+      "emoji": "🇨🇳",
+      "sources": [
+        { "name": "BBC中文", "url": "https://feeds.bbci.co.uk/zhongwen/simp/rss.xml" },
+        { "name": "RFI中文", "url": "https://www.rfi.fr/cn/rss" }
+      ]
+    },
+    {
+      "id": "hongkong",
+      "label": "香港",
+      "emoji": "🏙️",
+      "sources": [
+        { "name": "SCMP", "url": "https://www.scmp.com/rss/2/feed" }
+      ]
+    },
+    {
+      "id": "germany",
+      "label": "德国",
+      "emoji": "🇩🇪",
+      "sources": [
+        { "name": "Deutsche Welle", "url": "https://rss.dw.com/rdf/rss-en-all" }
+      ]
+    },
+    {
+      "id": "us",
+      "label": "美国",
+      "emoji": "🇺🇸",
+      "sources": [
+        { "name": "NYT US", "url": "https://rss.nytimes.com/services/xml/rss/nyt/US.xml" },
+        { "name": "NPR", "url": "https://feeds.npr.org/1001/rss.xml" }
+      ]
+    },
+    {
+      "id": "africa",
+      "label": "非洲",
+      "emoji": "🌍",
+      "sources": [
+        { "name": "BBC Africa", "url": "http://feeds.bbci.co.uk/news/world/africa/rss.xml" }
+      ]
+    },
+    {
+      "id": "southeast_asia",
+      "label": "东南亚",
+      "emoji": "🌏",
+      "sources": [
+        { "name": "CNA", "url": "https://www.channelnewsasia.com/rssfeeds/8395744" }
+      ]
+    },
+    {
+      "id": "japan",
+      "label": "日本",
+      "emoji": "🇯🇵",
+      "sources": [
+        { "name": "Japan Times", "url": "https://japantimes.co.jp/feed/" }
+      ]
+    },
+    {
+      "id": "tech",
+      "label": "科技",
+      "emoji": "💻",
+      "sources": [
+        { "name": "Hacker News", "url": "https://hnrss.org/frontpage" },
+        { "name": "Ars Technica", "url": "http://feeds.arstechnica.com/arstechnica/index" },
+        { "name": "MIT Tech Review", "url": "https://www.technologyreview.com/feed/" }
+      ]
+    },
+    {
+      "id": "finance",
+      "label": "金融",
+      "emoji": "💰",
+      "sources": [
+        { "name": "WSJ Markets", "url": "https://feeds.a.dj.com/rss/RSSMarketsMain.xml" },
+        { "name": "Financial Times", "url": "https://www.ft.com/rss/home" }
+      ]
+    },
+    {
+      "id": "culture",
+      "label": "文化",
+      "emoji": "🎭",
+      "sources": [
+        { "name": "Guardian Culture", "url": "https://www.theguardian.com/culture/rss" },
+        { "name": "NYT Arts", "url": "https://rss.nytimes.com/services/xml/rss/nyt/Arts.xml" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "news-aggregator-mcp",
+  "version": "1.0.0",
+  "description": "RSS news aggregator MCP with dedup and ranking",
+  "type": "module",
+  "main": "index.js",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "rss-parser": "^3.13.0"
+  }
+}
