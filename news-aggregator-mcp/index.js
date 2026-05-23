@@ -64,8 +64,19 @@ async function fetchByCategory() {
         cat.sources.map((src) => fetchSource(parser, src))
       );
       const all = batches.flat().sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-      // Prefer fresh articles; fall back to most recent if none are within 24h
-      const best = all.find((a) => a.fresh) || all[0] || null;
+
+      // If priority_keywords defined, prefer articles whose title/summary match any keyword
+      let best = null;
+      if (cat.priority_keywords && cat.priority_keywords.length > 0) {
+        const kw = cat.priority_keywords.map((k) => k.toLowerCase());
+        const matches = all.filter((a) => {
+          const text = (a.title + " " + a.summary).toLowerCase();
+          return kw.some((k) => text.includes(k));
+        });
+        best = matches.find((a) => a.fresh) || matches[0] || all.find((a) => a.fresh) || all[0] || null;
+      } else {
+        best = all.find((a) => a.fresh) || all[0] || null;
+      }
 
       return {
         category: cat.id,

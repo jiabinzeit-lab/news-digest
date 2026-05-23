@@ -21,8 +21,9 @@
       "id": "germany",
       "label": "德国",
       "emoji": "🇩🇪",
+      "priority_keywords": ["Bundestag", "chancellor", "coalition", "election", "parliament", "CDU", "SPD", "AfD", "Greens", "FDP", "Merz", "Scholz", "minister", "government", "party", "poll", "survey", "opinion", "voters", "protest", "majority"],
       "sources": [
-        { "name": "Deutsche Welle", "url": "https://rss.dw.com/rdf/rss-en-all" }
+        { "name": "Deutsche Welle", "url": "https://rss.dw.com/xml/rss-en-ger" }
       ]
     },
     {
