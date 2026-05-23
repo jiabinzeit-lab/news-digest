@@ -64,6 +64,7 @@
       "id": "tech",
       "label": "科技",
       "emoji": "💻",
+      "priority_keywords": ["AI", "artificial intelligence", "machine learning", "LLM", "GPT", "Claude", "Gemini", "OpenAI", "Anthropic", "Google DeepMind", "model", "neural", "chatbot", "AGI", "robot", "automation", "Nvidia", "chip", "semiconductor"],
       "sources": [
         { "name": "Wired", "url": "https://www.wired.com/feed/rss" },
         { "name": "Ars Technica", "url": "http://feeds.arstechnica.com/arstechnica/index" },
