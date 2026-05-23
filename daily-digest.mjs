@@ -91,7 +91,7 @@ async function main() {
     categories.map(async (cat) => {
       const batches = await Promise.all(cat.sources.map((s) => fetchSource(parser, s)));
       const all = batches.flat().sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-      const best = all.find((a) => a.fresh) || all[0] || null;
+      let best = all.find((a) => a.fresh) || all[0] || null;
       // 德文来源自动翻译
       if (best && GERMAN_SOURCES.has(best.source)) {
         const translated = await translateFromGerman(best.title, best.summary);
