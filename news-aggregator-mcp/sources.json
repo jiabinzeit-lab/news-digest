@@ -75,9 +75,10 @@
       "id": "finance",
       "label": "金融",
       "emoji": "💰",
+      "priority_keywords": ["stock", "shares", "equity", "S&P", "Nasdaq", "NYSE", "Dow", "IPO", "earnings", "bull", "bear", "ETF", "fund", "rally", "selloff", "valuation", "Fed", "rates", "inflation", "yield", "crypto", "Bitcoin", "venture", "fintech", "market cap", "investor"],
       "sources": [
-        { "name": "WSJ Markets", "url": "https://feeds.a.dj.com/rss/RSSMarketsMain.xml" },
-        { "name": "Financial Times", "url": "https://www.ft.com/rss/home" }
+        { "name": "MarketWatch", "url": "https://feeds.marketwatch.com/marketwatch/topstories/" },
+        { "name": "The Block", "url": "https://www.theblock.co/rss.xml" }
       ]
     },
     {
