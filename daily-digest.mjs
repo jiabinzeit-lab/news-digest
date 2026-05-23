@@ -84,14 +84,14 @@ async function main() {
   let msg = `📰 *每日新闻日报*\n_${dateStr} · 柏林${timeStr}_\n${"─".repeat(28)}\n\n`;
   for (const cat of results) {
     if (!cat.article) {
-      msg += `${cat.emoji} *${cat.label}*\n_（今日暂无）_\n\n`;
+      msg += `${cat.emoji} _（今日暂无）_\n\n`;
       continue;
     }
     const { title, link, source, summary } = cat.article;
     const s = summary
       ? summary.replace(/([_*[\]()~>#+=|{}.!])/g, "\\$1").slice(0, 120)
       : "";
-    msg += `${cat.emoji} *${cat.label}*\n[${title}](${link})\n_${source}_${s ? " · " + s + (s.length === 120 ? "…" : "") : ""}\n\n`;
+    msg += `${cat.emoji} [${title}](${link})\n_${source}_${s ? " · " + s + (s.length === 120 ? "…" : "") : ""}\n\n`;
   }
   msg += `${"─".repeat(28)}\n_共10条_`;
 
