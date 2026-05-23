@@ -77,7 +77,7 @@
       "emoji": "💰",
       "priority_keywords": ["stock", "shares", "equity", "S&P", "Nasdaq", "NYSE", "Dow", "IPO", "earnings", "bull", "bear", "ETF", "fund", "rally", "selloff", "valuation", "Fed", "rates", "inflation", "yield", "crypto", "Bitcoin", "venture", "fintech", "market cap", "investor"],
       "sources": [
-        { "name": "MarketWatch", "url": "https://feeds.marketwatch.com/marketwatch/topstories/" },
+        { "name": "CNBC", "url": "https://www.cnbc.com/id/10000664/device/rss/rss.html" },
         { "name": "The Block", "url": "https://www.theblock.co/rss.xml" }
       ]
     },
