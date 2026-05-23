@@ -55,6 +55,7 @@
       "id": "japan",
       "label": "日本",
       "emoji": "🇯🇵",
+      "priority_keywords": ["Japan", "Japanese", "Tokyo", "Osaka", "Kyoto", "Nikkei", "yen", "Kishida", "Ishiba", "LDP", "Emperor", "Diet", "Okinawa", "Hokkaido", "Fukushima", "Nippon", "Nintendo", "Sony", "Toyota"],
       "sources": [
         { "name": "Japan Times", "url": "https://japantimes.co.jp/feed/" }
       ]
