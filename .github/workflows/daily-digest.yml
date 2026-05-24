@@ -2,11 +2,9 @@ name: Daily News Digest
 
 on:
   schedule:
-    # 7:00 UTC = 9:00 CEST (夏令时, 4月-10月)
-    # 8:00 UTC = 9:00 CET  (冬令时, 10月-4月)
-    # 两个时间都触发，脚本内部判断柏林时间是否为9点
-    - cron: '0 7 * * *'
-    - cron: '0 8 * * *'
+    # 4:00 UTC = 6:00 CEST (夏令时) / 5:00 CET (冬令时)
+    # 提前触发，预留 GitHub 队列延迟，确保9点前送达
+    - cron: '0 4 * * *'
   workflow_dispatch: # 允许手动触发
 
 jobs:
