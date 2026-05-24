@@ -2,9 +2,10 @@ name: Daily News Digest
 
 on:
   schedule:
-    # 4:00 UTC = 6:00 CEST (夏令时) / 5:00 CET (冬令时)
-    # 提前触发，预留 GitHub 队列延迟，确保9点前送达
+    # 早上：4:00 UTC = 6:00 CEST / 5:00 CET
     - cron: '0 4 * * *'
+    # 晚上：17:00 UTC = 19:00 CEST / 18:00 CET
+    - cron: '0 17 * * *'
   workflow_dispatch: # 允许手动触发
 
 jobs:
