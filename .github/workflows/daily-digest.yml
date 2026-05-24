@@ -29,16 +29,9 @@ jobs:
           cd news-aggregator-mcp && npm ci
           cd ../telegram-push-mcp && npm ci
 
-      - name: Check Berlin time and send digest
+      - name: Send digest
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: |
-          BERLIN_HOUR=$(TZ=Europe/Berlin date +%H)
-          # 手动触发(workflow_dispatch)直接运行；定时触发只在柏林9点窗口运行
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$BERLIN_HOUR" = "09" ]; then
-            node daily-digest.mjs
-          else
-            echo "柏林当前 ${BERLIN_HOUR} 时，跳过（非9点窗口）"
-          fi
+        run: node daily-digest.mjs
