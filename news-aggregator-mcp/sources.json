@@ -65,10 +65,11 @@
       "label": "科技",
       "emoji": "💻",
       "priority_keywords": ["AI", "artificial intelligence", "machine learning", "LLM", "GPT", "Claude", "Gemini", "OpenAI", "Anthropic", "Google DeepMind", "model", "neural", "chatbot", "AGI", "robot", "automation", "Nvidia", "chip", "semiconductor"],
+      "exclude_keywords": ["deal", "deals", "sale", "discount", "best buy", "coupon", "offer", "save", "gift", "buying guide", "hands on", "hands-on", "unboxing"],
       "sources": [
-        { "name": "Wired", "url": "https://www.wired.com/feed/rss" },
+        { "name": "MIT Tech Review", "url": "https://www.technologyreview.com/feed/" },
         { "name": "Ars Technica", "url": "http://feeds.arstechnica.com/arstechnica/index" },
-        { "name": "MIT Tech Review", "url": "https://www.technologyreview.com/feed/" }
+        { "name": "Wired", "url": "https://www.wired.com/feed/rss" }
       ]
     },
     {

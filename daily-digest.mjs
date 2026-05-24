@@ -90,7 +90,12 @@ async function main() {
   const results = await Promise.all(
     categories.map(async (cat) => {
       const batches = await Promise.all(cat.sources.map((s) => fetchSource(parser, s)));
-      const all = batches.flat().sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+      const allRaw = batches.flat().sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+      // 排除黑名单关键词（不区分大小写）
+      const excludeRe = cat.exclude_keywords?.length
+        ? new RegExp(cat.exclude_keywords.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "i")
+        : null;
+      const all = excludeRe ? allRaw.filter(a => !excludeRe.test(a.title + " " + a.summary)) : allRaw;
       let best = all.find((a) => a.fresh) || all[0] || null;
       // 德文来源自动翻译
       if (best && GERMAN_SOURCES.has(best.source)) {
