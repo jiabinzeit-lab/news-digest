@@ -76,10 +76,11 @@
       "id": "finance",
       "label": "金融",
       "emoji": "💰",
-      "priority_keywords": ["stock", "shares", "equity", "S&P", "Nasdaq", "NYSE", "Dow", "IPO", "earnings", "bull", "bear", "ETF", "fund", "rally", "selloff", "valuation", "Fed", "rates", "inflation", "yield", "crypto", "Bitcoin", "venture", "fintech", "market cap", "investor"],
+      "priority_keywords": ["economy", "economic", "Fed", "Federal Reserve", "interest rate", "inflation", "GDP", "recession", "monetary policy", "fiscal policy", "central bank", "market", "stock", "S&P", "Nasdaq", "bond", "yield", "trade", "tariff", "deficit", "debt", "investment", "hedge fund", "private equity", "IPO", "earnings", "Wall Street"],
       "sources": [
         { "name": "The Economist", "url": "https://www.economist.com/finance-and-economics/rss.xml" },
-        { "name": "The Block", "url": "https://www.theblock.co/rss.xml" }
+        { "name": "Project Syndicate", "url": "https://www.project-syndicate.org/rss" },
+        { "name": "NYT Business", "url": "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml" }
       ]
     },
     {
