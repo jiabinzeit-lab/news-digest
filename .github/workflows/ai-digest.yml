@@ -1,0 +1,46 @@
+name: AI & 芯片深度日报
+
+on:
+  schedule:
+    # 07:00 UTC = 09:00 柏林（CEST）/ 08:00 CET
+    - cron: '0 7 * * *'
+  workflow_dispatch: # 允许手动触发
+
+# 允许 workflow 写回 repo（更新已发送列表）
+permissions:
+  contents: write
+
+jobs:
+  send-ai-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: |
+            news-aggregator-mcp/package-lock.json
+            telegram-push-mcp/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd news-aggregator-mcp && npm ci
+          cd ../telegram-push-mcp && npm ci
+
+      - name: Send AI digest
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node ai-digest.mjs
+
+      - name: Commit sent list
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add ai-digest-sent.json
+          git diff --staged --quiet || git commit -m "chore: update ai-digest sent list [skip ci]"
+          git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:main
