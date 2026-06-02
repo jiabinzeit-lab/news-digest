@@ -107,7 +107,7 @@ ${context}
 5. 直接输出分析正文，不加前缀`;
 
   const res = await client.messages.create({
-    model: "claude-sonnet-4-5-20251101",
+    model: "claude-sonnet-4-5",
     max_tokens: 3000,
     messages: [{ role: "user", content: prompt }],
   });
