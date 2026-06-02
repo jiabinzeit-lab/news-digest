@@ -69,31 +69,46 @@ async function fetchArticleText(url) {
       .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&")
       .replace(/&lt;/g, "<").replace(/&gt;/g, ">")
       .replace(/\s+/g, " ").trim();
-    return text.slice(0, 4000);
+    return text.slice(0, 12000);
   } catch {
     return null;
   }
 }
 
 async function summarize(article, client) {
-  const context = (article.fullText || article.summary || "").slice(0, 3000);
-  const prompt = `你是一位专业的科技与半导体行业分析师。请根据以下文章信息，用中文写一篇详细总结（350-450字）。
+  const rawContent = article.fullText || article.summary || "";
+  const context = rawContent.slice(0, 10000);
+  const hasFullText = rawContent.length > 1500;
+
+  const prompt = hasFullText
+    ? `你是一位专业的科技与半导体行业翻译和分析师。请将以下英文文章完整翻译成中文，保留所有技术细节、数据和论述逻辑。翻译要流畅自然，专业术语保持准确。
 
 来源：${article.source}
 标题：${article.title}
-原文内容：
+
+原文：
 ${context}
 
 要求：
-1. 提炼文章核心论点，保留关键数据和技术细节
-2. 解释技术或商业上的深层意义
-3. 指出对行业/市场的影响
-4. 语言简洁专业，适合中文读者
-5. 直接输出总结正文，不加"总结："等前缀`;
+1. 完整翻译全文，不要省略任何段落或数据
+2. 专业术语（如 CoWoS、HBM、TSMC N2 等）保留英文原词并附中文说明
+3. 直接输出译文正文，不加"翻译："等前缀`
+    : `你是一位专业的科技与半导体行业分析师。以下是一篇文章的标题和摘要（原文可能需要付费订阅），请根据现有信息写一篇深度中文分析（600-800字）。
+
+来源：${article.source}
+标题：${article.title}
+摘要：${context}
+
+要求：
+1. 结合摘要内容和你对该领域的专业知识，深入分析文章论点
+2. 补充相关背景信息、行业数据和趋势
+3. 指出技术或商业上的深层意义及对行业的影响
+4. 语言专业流畅，适合中文科技读者
+5. 直接输出分析正文，不加前缀`;
 
   const res = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 900,
+    model: "claude-sonnet-4-5-20251101",
+    max_tokens: 3000,
     messages: [{ role: "user", content: prompt }],
   });
   return res.content[0].text.trim();
@@ -128,7 +143,7 @@ async function main() {
           title:   i.title.trim(),
           link:    i.link,
           pubDate: i.pubDate,
-          summary: (i.contentSnippet || i["content:encoded"] || "").replace(/<[^>]+>/g, " ").slice(0, 500).trim(),
+          summary: (i.contentSnippet || i["content:encoded"] || "").replace(/<[^>]+>/g, " ").slice(0, 2000).trim(),
         }));
       log(`${src.name}: ${items.length} 篇相关文章`);
       allItems.push(...items);
