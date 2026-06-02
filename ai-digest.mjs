@@ -115,7 +115,8 @@ ${context}
 }
 
 function escapeMarkdown(text) {
-  return text.replace(/([_*[\]()~>#+=|{}.!\\-])/g, "\\$1");
+  // 普通 Markdown 模式只需转义这几个字符
+  return text.replace(/([_*`[\]])/g, "\\$1");
 }
 
 async function main() {
@@ -203,16 +204,13 @@ async function main() {
     timeZone: "Europe/Berlin",
   });
 
-  let msg = `🤖 *AI & 芯片深度*\n_${escapeMarkdown(dateStr)}_\n${"─".repeat(28)}\n\n`;
+  let msg = `🤖 *AI & 芯片深度*\n_${dateStr}_\n${"─".repeat(28)}\n\n`;
 
   for (let i = 0; i < picks.length; i++) {
     const { title, link, source, chineseSummary } = picks[i];
-    const safeTitle   = escapeMarkdown(title);
-    const safeSource  = escapeMarkdown(source);
-    const safeSummary = escapeMarkdown(chineseSummary);
-    msg += `*${i + 1}\\. [${safeTitle}](${link})*\n`;
-    msg += `_${safeSource}_\n\n`;
-    msg += `${safeSummary}\n\n`;
+    msg += `*${i + 1}. [${escapeMarkdown(title)}](${link})*\n`;
+    msg += `_${source}_\n\n`;
+    msg += `${chineseSummary}\n\n`;
     if (i < picks.length - 1) msg += `${"─".repeat(28)}\n\n`;
   }
 
@@ -233,7 +231,7 @@ async function main() {
 
   for (const chunk of chunks.filter(Boolean)) {
     await bot.sendMessage(CHAT_ID, chunk, {
-      parse_mode: "MarkdownV2",
+      parse_mode: "Markdown",
       disable_web_page_preview: true,
     });
   }
