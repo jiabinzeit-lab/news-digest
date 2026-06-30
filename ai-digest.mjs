@@ -106,12 +106,25 @@ ${context}
 4. 语言专业流畅，适合中文科技读者
 5. 直接输出分析正文，不加前缀`;
 
-  const res = await client.messages.create({
-    model: "claude-sonnet-4-5",
-    max_tokens: 3000,
-    messages: [{ role: "user", content: prompt }],
-  });
-  return res.content[0].text.trim();
+  // 用流式请求：长文翻译生成耗时 60-80s，非流式连接会被中间层提前关闭
+  // （报错 "Premature close"）。流式保持连接活跃，并加重试兜底瞬时网络错误。
+  let lastErr;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const stream = client.messages.stream({
+        model: "claude-sonnet-4-5",
+        max_tokens: 3000,
+        messages: [{ role: "user", content: prompt }],
+      });
+      const final = await stream.finalMessage();
+      return final.content[0].text.trim();
+    } catch (e) {
+      lastErr = e;
+      log(`   ⚠️  生成第 ${attempt}/3 次失败: ${e.message}`);
+      if (attempt < 3) await new Promise(r => setTimeout(r, 3000 * attempt));
+    }
+  }
+  throw lastErr;
 }
 
 function escapeMarkdown(text) {
@@ -178,7 +191,9 @@ async function main() {
   }
 
   // 尝试抓取全文
-  const client = process.env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }) : null;
+  const client = process.env.ANTHROPIC_API_KEY
+    ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 4, timeout: 180000 })
+    : null;
   if (!client) {
     log("⚠️  无 ANTHROPIC_API_KEY，跳过总结");
     process.exit(1);
