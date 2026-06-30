@@ -75,13 +75,8 @@ async function fetchArticleText(url) {
   }
 }
 
-async function summarize(article, client) {
-  const rawContent = article.fullText || article.summary || "";
-  const context = rawContent.slice(0, 10000);
-  const hasFullText = rawContent.length > 1500;
-
-  const prompt = hasFullText
-    ? `你是一位专业的科技与半导体行业翻译和分析师。请将以下英文文章完整翻译成中文，保留所有技术细节、数据和论述逻辑。翻译要流畅自然，专业术语保持准确。
+function translatePrompt(article, context) {
+  return `你是一位专业的科技与半导体行业翻译和分析师。请将以下英文文章完整翻译成中文，保留所有技术细节、数据和论述逻辑。翻译要流畅自然，专业术语保持准确。
 
 来源：${article.source}
 标题：${article.title}
@@ -92,39 +87,67 @@ ${context}
 要求：
 1. 完整翻译全文，不要省略任何段落或数据
 2. 专业术语（如 CoWoS、HBM、TSMC N2 等）保留英文原词并附中文说明
-3. 直接输出译文正文，不加"翻译："等前缀`
-    : `你是一位专业的科技与半导体行业分析师。以下是一篇文章的标题和摘要（原文可能需要付费订阅），请根据现有信息写一篇深度中文分析（600-800字）。
+3. 直接输出译文正文，不加"翻译："等前缀`;
+}
+
+function summaryPrompt(article, context) {
+  return `你是一位专业的科技与半导体行业分析师。以下是一篇文章的标题和内容（可能为摘要），请写一篇深度中文分析（600-800字）。
 
 来源：${article.source}
 标题：${article.title}
-摘要：${context}
+内容：${context}
 
 要求：
-1. 结合摘要内容和你对该领域的专业知识，深入分析文章论点
+1. 结合内容和你对该领域的专业知识，深入分析文章论点
 2. 补充相关背景信息、行业数据和趋势
 3. 指出技术或商业上的深层意义及对行业的影响
 4. 语言专业流畅，适合中文科技读者
 5. 直接输出分析正文，不加前缀`;
+}
 
-  // 用流式请求：长文翻译生成耗时 60-80s，非流式连接会被中间层提前关闭
-  // （报错 "Premature close"）。流式保持连接活跃，并加重试兜底瞬时网络错误。
+// 单次流式生成（带 2 次重试）。流式保持连接活跃，缓解中间层提前关闭连接
+// 导致的 "Premature close"。
+async function generate(client, model, prompt, maxTokens) {
   let lastErr;
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= 2; attempt++) {
     try {
       const stream = client.messages.stream({
-        model: "claude-sonnet-4-5",
-        max_tokens: 3000,
+        model,
+        max_tokens: maxTokens,
         messages: [{ role: "user", content: prompt }],
       });
       const final = await stream.finalMessage();
-      return final.content[0].text.trim();
+      const text = final.content[0].text.trim();
+      if (text) return text;
+      throw new Error("空回复");
     } catch (e) {
       lastErr = e;
-      log(`   ⚠️  生成第 ${attempt}/3 次失败: ${e.message}`);
-      if (attempt < 3) await new Promise(r => setTimeout(r, 3000 * attempt));
+      const cause = e.cause?.message || e.cause?.code || "";
+      log(`   ⚠️  ${model} 第 ${attempt}/2 次失败: ${e.message}${cause ? ` (${cause})` : ""}`);
+      if (attempt < 2) await new Promise(r => setTimeout(r, 3000));
     }
   }
   throw lastErr;
+}
+
+async function summarize(article, client) {
+  const rawContent = article.fullText || article.summary || "";
+  const context = rawContent.slice(0, 10000);
+  const hasFullText = rawContent.length > 1500;
+
+  // 有全文：先用 Sonnet 全文翻译；若长生成被掐断（Premature close），
+  // 降级到更快的 Haiku 出一篇深度摘要，保证推送不被单篇文章卡死。
+  if (hasFullText) {
+    try {
+      return await generate(client, "claude-sonnet-4-5", translatePrompt(article, context), 3000);
+    } catch (e) {
+      log(`   ↪️  Sonnet 全文翻译失败，降级 Haiku 摘要`);
+      return await generate(client, "claude-haiku-4-5-20251001", summaryPrompt(article, context.slice(0, 4000)), 1500);
+    }
+  }
+
+  // 仅摘要：直接用 Haiku 出深度分析（短生成，稳定）
+  return await generate(client, "claude-haiku-4-5-20251001", summaryPrompt(article, context), 1500);
 }
 
 function escapeMarkdown(text) {
@@ -206,10 +229,24 @@ async function main() {
     else log(`   全文抓取失败，使用RSS摘要`);
   }
 
-  // 生成中文总结
+  // 生成中文总结：单篇失败不影响其它文章，避免一篇卡死整个推送
   for (const p of picks) {
     log(`✍️  生成总结: ${p.title.slice(0, 50)}`);
-    p.chineseSummary = await summarize(p, client);
+    try {
+      p.chineseSummary = await summarize(p, client);
+    } catch (e) {
+      log(`   ❌ 该篇生成彻底失败，跳过: ${e.message}`);
+      p.chineseSummary = null;
+    }
+  }
+
+  // 只保留成功生成的文章
+  const ready = picks.filter(p => p.chineseSummary);
+  if (ready.length === 0) {
+    // 全部失败也要把这些文章记为已发送，否则明天还会卡在同样的文章上
+    log("❌ 所有文章生成失败，标记为已发送以避免卡死后退出");
+    await saveSent([...sentUrls, ...picks.map(p => p.link)]);
+    process.exit(1);
   }
 
   // 格式化 Telegram 消息（MarkdownV2）
@@ -221,12 +258,12 @@ async function main() {
 
   let msg = `🤖 *AI & 芯片深度*\n_${dateStr}_\n${"─".repeat(28)}\n\n`;
 
-  for (let i = 0; i < picks.length; i++) {
-    const { title, link, source, chineseSummary } = picks[i];
+  for (let i = 0; i < ready.length; i++) {
+    const { title, link, source, chineseSummary } = ready[i];
     msg += `*${i + 1}. [${escapeMarkdown(title)}](${link})*\n`;
     msg += `_${source}_\n\n`;
     msg += `${chineseSummary}\n\n`;
-    if (i < picks.length - 1) msg += `${"─".repeat(28)}\n\n`;
+    if (i < ready.length - 1) msg += `${"─".repeat(28)}\n\n`;
   }
 
   // 发送
@@ -252,10 +289,11 @@ async function main() {
   }
   log("✅ 发送成功");
 
-  // 更新已发送列表
+  // 更新已发送列表：所有处理过的文章都记为已发送（含生成失败的），
+  // 防止某篇一直失败把流水线永久卡死
   const newSent = [...sentUrls, ...picks.map(p => p.link)];
   await saveSent(newSent);
-  log(`已记录 ${picks.length} 篇，总记录 ${newSent.slice(-100).length} 篇`);
+  log(`已发送 ${ready.length} 篇 / 处理 ${picks.length} 篇，总记录 ${newSent.slice(-100).length} 篇`);
 }
 
 main().catch(e => {
